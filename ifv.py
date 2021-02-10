@@ -12,7 +12,7 @@ class Ifv:
     def main(self, args):
         input_file = 'C:/Users/Marco/IFV/data/insilico_AT5G02120.1.dbr'
         #input_file = 'C:/Users/Marco/IFV/data/AT5G02120.1.fa.dbr'
-        file_version = 1
+        file_version = 2
 
         with open(input_file, 'r') as input:
             lines = input.readlines()
