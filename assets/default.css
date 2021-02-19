@@ -1,0 +1,35 @@
+#wrapper{
+    height: 100vh;
+    width: 100vw;
+    /*overflow: hidden;*/
+}
+
+#menu{
+    /* background-color: blue; */
+    background-color: #111111;
+}
+
+#plot{
+    /*background-color: green;*/
+    background-color: #111111;
+}
+
+#graph{
+   /*background-color: orange;*/
+    background-color: #111111;
+}
+
+.column{
+    height: 100%;
+    /*overflow: hidden;*/
+}
+
+.forna-container{
+    height: 100vh;
+}
+
+.forna-container circle.node.label {
+   /* fill: #262626 !important; */
+   /* color: white !important; */
+}
+

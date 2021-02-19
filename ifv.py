@@ -1,89 +1,80 @@
+# -*- coding: utf-8 -*-
 import argparse
+import dash
+import dash_html_components as html
+import dash_core_components as dcc
 
-from pca_plot import plot
-from folding import parse, parse_two
+from FORNAPlotter import FORNAPlotter
+from data_manager import data_manager
+from pca_plot import PCAPlotter
+
+sample_files = ['AT2G02130.1.fa.dbr', 'insilico_AT5G02120.1.dbr']
 
 
 class Ifv:
-
     def __init__(self):
+        self.__parse_parameters()
+        self.__read_data()
+        self.__create()
+        self.__plot()
+
+    def __parse_parameters(self):
+        self.prs = argparse.ArgumentParser(
+            description='Interactive Folding Visualizer')
+        self.prs.add_argument('-i', '--input', required=False,
+                         help='Working Directory')
+        self.prs.parse_args()
+
+    def __read_data(self):
+        version = 1
+        # self, input_path, position_file, section_file,  folding_version
+        self.data_provider = data_manager(input_path='C:/Users/Marco/IFV/data/', position_file='xlsite',
+                                          section_file='Araport11_protein_coding.201606', folding_version=version)
+        self.__read_file(sample_files[version - 1])
         print(self)
 
-    def main(self, args):
-        input_file = 'C:/Users/Marco/IFV/data/insilico_AT5G02120.1.dbr'
-        #input_file = 'C:/Users/Marco/IFV/data/AT5G02120.1.fa.dbr'
-        file_version = 2
+    def __read_file(self, name):
+        self.section = self.data_provider.read_section(name.replace('.fa.dbr', ''))
+        self.positions = self.data_provider.read_positions(self.section)
+        self.folding = self.data_provider.read_file(name, self.section, self.positions)
 
-        with open(input_file, 'r') as input:
-            lines = input.readlines()
+    def __create(self):
+        self.app = dash.Dash(__name__)
+        self.__initLayout()
 
-        foldings = []
-        sequence = ''
-        heading = ''
-        folding = ''
+    def __plot(self):
+        plotter = PCAPlotter()
+        plotter_forna = FORNAPlotter()
+        fig = plotter.plot(self.folding)
+        forna = plotter_forna.plot(folding=self.folding[0])
 
-        if file_version == 1:
-            for line in lines:
+        self.plot.children = [dcc.Graph(
+            figure=fig
+        )]
 
-                if line.startswith('>'):
-                    heading = line.strip()
-
-                if not line.startswith('>') and sequence != '':
-                    folding = line.strip()
-
-                if not line.startswith('>') and sequence == '':
-                    sequence = line.strip()
-
-                if sequence != '' and heading != '' and folding != '':
-                    foldings.append(parse(heading, sequence, folding))
-                    heading = ''
-                    folding = ''
-
-            if sequence != '' and heading != '' and folding != '':
-                foldings.append(parse(heading, sequence, folding))
-
-        if file_version == 2:
-            count  = 0
-            for line in lines:
-
-                if line.startswith('>'):
-                    if sequence != '' and heading != '' and folding != '':
-
-                        heading = heading.replace('ENERGY:', 'ENERGY = ') + 'AT5G02120.1::Chr5:419090-419773(+)'
-                        foldings.append(parse_two(heading, sequence, folding))
-                        heading = ''
-                        folding = ''
-                    count += 1
-                    heading = line.strip()
-
-                if not line.startswith('>') and count > 1:
-                    folding += line.strip()
-
-                if not line.startswith('>') and count == 1:
-                    sequence += line.strip()
-
-            if sequence != '' and heading != '' and folding != '':
-                heading = heading.replace('ENERGY:', 'ENERGY = ') + 'AT5G02120.1::Chr5:419090-419773(+)'
-                foldings.append(parse_two(heading, sequence, folding))
-
-        pca_vectors = []
-        labels = []
-        colors = []
-        for val in foldings:
-            pca_vectors.append(val.pca_vector)
-            labels.append(str(val.energy)+' kcal/mol')
-            colors.append(val.energy)
+        self.graph.children = [html.Div(forna)]
 
 
-            print(val.pca_vector)
+    def __initLayout(self):
 
-        plot(pca_vectors, labels, colors)
+        #self.heading = html.H1(children=['Interactive Folding Visualizer'])
+        self.graph = html.Div(children=['Graph'], id='graph', className='col-md-7 column')
+        self.plot = html.Div(children=['Plot'], id='plot', className='col-md-3 column')
+        #self.menu = html.Div(children=[self.heading], id='menu', className='col-md-2 column')
+        self.menu = html.Div(id='menu', className='col-md-2 column')
+
+        self.wrapper = html.Div(children=[
+                        self.menu,
+                        self.graph,
+                        self.plot
+                        ], id='wrapper')
+
+        self.app.layout = self.wrapper
+
+    def start(self):
+        self.app.run_server(debug=True)
+
 
 if __name__ == '__main__':
-    prs = argparse.ArgumentParser(
-        description='Interactive Folding Visualizer')
-    prs.add_argument('-i', '--input', required=False,
-                     help='Working Directory')
     ifv = Ifv()
-    ifv.main(prs.parse_args())
-
+    ifv.start()
