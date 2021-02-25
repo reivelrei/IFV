@@ -9,6 +9,17 @@
     background-color: #111111;
 }
 
+label{
+    color: white;
+}
+
+#menu button{
+    width: 100%;
+    background: white;
+    color: black;
+    text-align: left !important;
+}
+
 #plot{
     /*background-color: green;*/
     background-color: #111111;

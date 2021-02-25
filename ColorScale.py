@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class ColorScale(Enum):
+class ColorScale(IntEnum):
     ABSOLUTE = 1
     LOG = 2
     REGION = 3

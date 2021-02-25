@@ -2,9 +2,17 @@ from folding import parse
 from position import Position
 from section import Section
 
+from os import listdir, walk
+
 
 class data_manager:
     def __init__(self, input_path, position_file, section_file,  folding_version):
+        self.input_path = input_path
+        self.position_file = position_file
+        self.section_file = section_file
+        self.folding_version = folding_version
+
+    def update(self, input_path, position_file, section_file,  folding_version):
         self.input_path = input_path
         self.position_file = position_file
         self.section_file = section_file
@@ -17,16 +25,16 @@ class data_manager:
         with open(input_file, 'r') as input:
             lines = input.readlines()
 
-        if '.dbr' in name and self.folding_version == 1:
+        if self.folding_version == 1:
             data = self.read_folding(lines=lines, section=section, positions=positions)
         else:
-            if '.dbr' in name and self.folding_version == 2:
+            if self.folding_version == 2:
                 data = self.read_folding_two(lines=lines, section=section, positions=positions)
 
         return data
 
     def read_section(self, transcript):
-        input_file = self.input_path + self.section_file + '.bed'
+        input_file = self.input_path + self.section_file
 
         with open(input_file, 'r') as input:
             for line in input:
@@ -35,7 +43,7 @@ class data_manager:
                     return Section(transcript=values[3], chrom=values[0], start=values[1], end=values[2], sign=values[5], thickstart=values[6], thickend=values[7], block_size=values[10], block_start=values[11].strip())
 
     def read_positions(self, section):
-        input_file = self.input_path + self.position_file + '.bedgraph'
+        input_file = self.input_path + self.position_file
         positions = []
         start = int(section.start)
         end = int(section.end)
@@ -101,3 +109,27 @@ class data_manager:
             foldings.append(parse(heading, sequence, folding, section, positions))
 
         return foldings
+
+    def list_files(self):
+        files = {}
+
+        files['position_files'] = []
+        files['section_files'] = []
+        files['folding_files'] = []
+        files['unknown'] = []
+
+        f = []
+        for (dirpath, dirnames, filenames) in walk(self.input_path):
+            for file in filenames:
+                if '.BEDGRAPH' in file.upper():
+                    files['position_files'].append(file)
+                else:
+                    if '.BED' in file.upper():
+                        files['section_files'].append(file)
+                    else:
+                        if '.FA.DBR' in file.upper():
+                            files['folding_files'].append(file)
+                        else:
+                            files['unknown'].append(file)
+
+        return files

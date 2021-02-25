@@ -5,24 +5,25 @@ from ColorScale import ColorScale
 from position import Position
 import operator
 
+
 class FORNAPlotter:
 
     def __init__(self):
-        self.colors = {}
+        pass
 
     def plot(self, folding, color_scale):
+        clrs = self.__create_color_array(folding, color_scale is ColorScale.REGION,  color_scale is ColorScale.LOG)
 
-        try:
-            clrs = self.colors[folding.section.transcript]
-        except KeyError:
-            self.colors[folding.section.transcript] = self.__create_color_array(folding,
-                                                                                color_scale is ColorScale.REGION,
-                                                                                color_scale is ColorScale.LOG)
-            clrs = self.colors[folding.section.transcript]
+        if color_scale is ColorScale.REGION:
+            domain = [0, 100, 200]
+            range = ['white', '#023E7D', '#5FADFC']
+        else:
+            domain = [0,  max(clrs.items(), key=operator.itemgetter(1))[1]]
+            range = ['white', 'red']
 
         custom_colors = {
-            'domain': [0, max(clrs.items(), key=operator.itemgetter(1))[1]],
-            'range': ['yellow', 'blue'],
+            'domain': domain,
+            'range': range,
             'colorValues': {
                 '': clrs
             }
@@ -37,8 +38,9 @@ class FORNAPlotter:
             }
         }]
 
-        fig = dashbio.FornaContainer(id='forna', sequences=sequences, height=900, width=1100,
+        fig = dashbio.FornaContainer(id='forna'+str(int(color_scale)), sequences=sequences, height=900, width=1100,
                                      colorScheme='custom', customColors=custom_colors)
+        print(fig)
         return fig
 
     def __create_color_array(self, folding, region, logscale):
@@ -92,9 +94,9 @@ class FORNAPlotter:
 
         if found:
             if found_block.is_utr():
-                color = 1
+                color = 200
             else:
-                color = 2
+                color = 100
 
         return color
 

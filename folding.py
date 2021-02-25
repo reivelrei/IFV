@@ -12,6 +12,7 @@ class Folding:
         self.foldings = foldings
         self.section = section
         self.positions = positions
+        self.label = energy
 
         self.pca_vector = []
 

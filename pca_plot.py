@@ -11,7 +11,9 @@ class PCAPlotter:
         colors = []
         for val in foldings:
             pca_vectors.append(val.pca_vector)
-            labels.append(str(val.energy) + ' kcal/mol')
+            lbl = str(val.energy) + ' kcal/mol'
+            val.label = lbl
+            labels.append(lbl)
             colors.append(val.energy)
 
         return PCAPlotter.__create_figure(pca_vectors, labels, colors)
