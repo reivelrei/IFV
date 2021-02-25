@@ -32,7 +32,7 @@ class data_manager:
             for line in input:
                 if transcript in line:
                     values = line.split("\t")
-                    return Section(transcript=values[3], chrom=values[0], start=values[1], end=values[2], sign=values[5])
+                    return Section(transcript=values[3], chrom=values[0], start=values[1], end=values[2], sign=values[5], thickstart=values[6], thickend=values[7], block_size=values[10], block_start=values[11].strip())
 
     def read_positions(self, section):
         input_file = self.input_path + self.position_file + '.bedgraph'

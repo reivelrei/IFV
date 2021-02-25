@@ -4,11 +4,12 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 
+from ColorScale import ColorScale
 from FORNAPlotter import FORNAPlotter
 from data_manager import data_manager
 from pca_plot import PCAPlotter
 
-sample_files = ['AT2G02130.1.fa.dbr', 'insilico_AT5G02120.1.dbr']
+sample_files = ['AT5G02120.1.fa.dbr', 'insilico_AT5G02120.1.dbr']
 
 
 class Ifv:
@@ -46,7 +47,7 @@ class Ifv:
         plotter = PCAPlotter()
         plotter_forna = FORNAPlotter()
         fig = plotter.plot(self.folding)
-        forna = plotter_forna.plot(folding=self.folding[0])
+        forna = plotter_forna.plot(folding=self.folding[0], color_scale=ColorScale.REGION)
 
         self.plot.children = [dcc.Graph(
             figure=fig
