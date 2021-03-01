@@ -68,7 +68,7 @@ class FORNAPlotter:
 
         index = 0
         for val in values:
-            colors[index+1] = val
+            colors[index] = val
             index += 1
 
         return colors

@@ -102,7 +102,7 @@ class Ifv:
                 id="bed_select",
                 options=[
                 ]),
-            dbc.Label('Bed-Graph-File (.bedgraph)'),
+            dbc.Label('Bedgraph-File (.bedgraph)'),
             dcc.Dropdown(
                 id="graph_select",
                 options=[
