@@ -27,7 +27,7 @@ class Section:
                 if index is 0:
                     # first block
                     start = utr_start_block_ende
-                    end = int(size)
+                    end = int(size) - 1
                     blocks.append(Block("CDS_" + str(index + 1), start, end))
                 else:
                     start = int(self.block_start[index])
@@ -40,9 +40,9 @@ class Section:
                     blocks.append(Block("CDS_" + str(index + 1), start, end))
                 index = index+1
 
-        blocks.append(Block("UTR_END", self.thickend+1 - self.start, self.end - self.start))
+        blocks.append(Block("UTR_END", self.thickend+1 - self.start, self.end - self.start-1))
 
-        for block in blocks:
-            print(block.bezeichnung+"\t"+str(block.start)+"\t" + str(block.end))
+        #for block in blocks:
+            #print(block.bezeichnung+"\t"+str(block.start)+"\t" + str(block.end))
 
         return blocks

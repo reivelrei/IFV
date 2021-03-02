@@ -6,6 +6,7 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
 from dash.dependencies import Input, Output
+import visdcc
 from ColorScale import ColorScale
 from FORNAPlotter import FORNAPlotter
 from data_manager import data_manager
@@ -33,6 +34,7 @@ class Ifv:
         self.plot = None
         self.menu = None
         self.wrapper = None
+        self.forna = None
 
         self.parse_parameters()
         self.read_data()
@@ -65,7 +67,7 @@ class Ifv:
         self.folding = self.data_provider.read_file(name, self.section, self.positions)
 
     def create(self):
-        self.app = dash.Dash(name=__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+        self.app = dash.Dash(name=__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
         self.init_layout()
         self.define_callbacks()
 
@@ -75,11 +77,12 @@ class Ifv:
         if plot_pca:
             plotter = PCAPlotter()
             fig = plotter.plot(self.folding)
-            graphs['pca'] = dcc.Graph(figure=fig)
+            graphs['pca'] = dcc.Graph(figure=fig, id="pca")
 
         if plot_forna:
             plotter_forna = FORNAPlotter()
             forna = plotter_forna.plot(folding=self.folding[self.selected_folding], color_scale=self.selected_color_mode)
+            self.forna = forna.id
             graphs['forna'] = html.Div(forna)
 
         return graphs
@@ -89,6 +92,7 @@ class Ifv:
         self.graph = html.Div(children=['Graph'], id='graph', className='col-md-7 column')
         self.plot = html.Div(children=['Plot'], id='plot', className='col-md-3 column')
         self.menu = html.Div(children=['Menu'], id='menu', className='col-md-2 column')
+        self.output = html.Div(children=[], id='output')
 
         self.wrapper = html.Div(children=[
                         self.menu,
@@ -100,21 +104,25 @@ class Ifv:
             dbc.Label('Bed-File (.bed)'),
             dcc.Dropdown(
                 id="bed_select",
+                value=None,
                 options=[
                 ]),
             dbc.Label('Bedgraph-File (.bedgraph)'),
             dcc.Dropdown(
                 id="graph_select",
+                value=None,
                 options=[
                 ]),
             dbc.Label('Transcript (.fa.dbr)'),
             dcc.Dropdown(
                 id="transcript_select",
+                value=None,
                 options=[
             ]),
             dbc.Label('Faltung'),
             dcc.Dropdown(
                 id="folding_select",
+                value=None,
                 options=[
             ]),
             dbc.FormGroup(
@@ -133,6 +141,8 @@ class Ifv:
                 ]
             ),
             dbc.Button("Download", color="info", className="mr-1", id='download_button'),
+            self.output,
+            visdcc.Run_js(id='javascript')
         ]
 
         graph_select = self.find_menu_child(id='graph_select')
@@ -177,6 +187,29 @@ class Ifv:
             graph = ifv.check_new_load()
             new_foldings = ifv.update_values()
             return graph['pca'], graph['forna'], new_foldings
+
+        @self.app.callback(
+            Output(component_id='folding_select', component_property='value'),
+            Input('pca', 'clickData'))
+        def on_data_clicked(click_data):
+            if click_data is not None:
+                index = click_data['points'][0]['pointIndex']
+                folding = self.folding[index]
+                # print(folding.label)
+                # print(click_data)
+                return index
+            else:
+                return self.selected_folding
+
+        @self.app.callback(
+            Output('javascript', 'run'),
+            Input('download_button', 'n_clicks'))
+        def on_download(n_clicks):
+            if n_clicks is not None:
+                forna_id = self.forna
+                return 'download(\"'+forna_id+'\")'
+
+            return ''
 
     def find_menu_child(self, id):
         child = []

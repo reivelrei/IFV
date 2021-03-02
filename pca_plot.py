@@ -29,7 +29,7 @@ class PCAPlotter:
         }
 
         df = {'x': components[:, 0] * -1, 'y': components[:, 1]}
-        fig = go.Figure(px.scatter(x=df['x'], y =df['y'], hover_name=point_labels,
+        fig = go.Figure(px.scatter(x=df['x'], y=df['y'], hover_name=point_labels,
                                    color=colors,
                                    color_continuous_scale=px.colors.sequential.Viridis,
                                    labels=labels, height=900, width=900, template="plotly_dark"))

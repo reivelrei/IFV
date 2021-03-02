@@ -9,6 +9,10 @@
     background-color: #111111;
 }
 
+#output{
+    color: red;
+}
+
 label{
     color: white;
 }
@@ -42,5 +46,9 @@ label{
 .forna-container circle.node.label {
    /* fill: #262626 !important; */
    /* color: white !important; */
+}
+
+.outline_node{
+    fill: black !important;
 }
 

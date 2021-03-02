@@ -38,9 +38,8 @@ class FORNAPlotter:
             }
         }]
 
-        fig = dashbio.FornaContainer(id='forna'+str(int(color_scale)), sequences=sequences, height=900, width=1100,
+        fig = dashbio.FornaContainer(id='forna'+str(int(color_scale))+folding.section.transcript, sequences=sequences, height=900, width=1100,
                                      colorScheme='custom', customColors=custom_colors)
-        print(fig)
         return fig
 
     def __create_color_array(self, folding, region, logscale):
@@ -68,7 +67,7 @@ class FORNAPlotter:
 
         index = 0
         for val in values:
-            colors[index] = val
+            colors[index+1] = val
             index += 1
 
         return colors
