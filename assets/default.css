@@ -1,20 +1,10 @@
 #wrapper{
     height: 100vh;
     width: 100vw;
-    /*overflow: hidden;*/
-}
-
-#menu{
-    /* background-color: blue; */
-    background-color: #111111;
 }
 
 #output{
     color: red;
-}
-
-label{
-    color: white;
 }
 
 #menu button{
@@ -24,31 +14,19 @@ label{
     text-align: left !important;
 }
 
-#plot{
-    /*background-color: green;*/
-    background-color: #111111;
-}
-
-#graph{
-   /*background-color: orange;*/
-    background-color: #111111;
-}
-
 .column{
     height: 100%;
-    /*overflow: hidden;*/
 }
 
 .forna-container{
     height: 100vh;
-}
-
-.forna-container circle.node.label {
-   /* fill: #262626 !important; */
-   /* color: white !important; */
+    background: white;
 }
 
 .outline_node{
     fill: black !important;
 }
 
+.background{
+    fill: white !important;
+}

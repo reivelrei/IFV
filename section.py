@@ -1,6 +1,16 @@
-from Block import Block
+from block import Block
 
 
+# This class represents a single section for a single transcript (= a row in the .bed file)
+# transcript - the transcript and name of the .fa.dbr file
+# chrom -  the chromosome
+# start - the start value
+# end - the end value
+# sign - the sign value
+# thickstart - the thickstart value
+# thickend - the thickend value
+# block_size - the blocksizes
+# block_start - the blockstarts
 class Section:
     def __init__(self, transcript, chrom, start, end, sign, thickstart, thickend,  block_size, block_start):
         self.transcript = transcript
@@ -14,6 +24,7 @@ class Section:
         self.block_start = block_start.split(",")
         self.blocks = self._calc_blocks()
 
+    # [PRIVATE] calculates the blocks for this section
     def _calc_blocks(self):
         blocks = []
         utr_start_block_ende = self.thickstart - self.start

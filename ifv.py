@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import argparse
+import time
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
@@ -7,14 +8,16 @@ import dash_bootstrap_components as dbc
 
 from dash.dependencies import Input, Output
 import visdcc
-from ColorScale import ColorScale
-from FORNAPlotter import FORNAPlotter
-from data_manager import data_manager
-from pca_plot import PCAPlotter
-sample_files = ['AT5G02120.1.fa.dbr', 'insilico_AT5G02120.1.dbr']
+from color import Color
+from forna import Forna
+from cache import Cache
+from datamanager import DataManager
+from pca import PCAPlotter
 version = 1
 
 
+# [MAIN]
+# IFV is a tool for visualizing RNA secondary structures and protein binding sites.
 class Ifv:
     def __init__(self):
         self.prs = None
@@ -25,52 +28,131 @@ class Ifv:
         self.positions = None
         self.folding = None
         self.app = None
-        self.selected_bed = 'Araport11_protein_coding.201606.bed'
-        self.selected_graph = 'xlsite.bedgraph'
-        self.selected_transcript = sample_files[version - 1]
-        self.selected_folding = 0
-        self.selected_color_mode = ColorScale.ABSOLUTE
+        self.selected_bed = None
+        self.selected_graph = None
+        self.selected_transcript = None
+        self.selected_folding_index = 0
+        self.selected_folding = None
+        self.selected_color_mode = Color.ABSOLUTE
         self.graph = None
         self.plot = None
         self.menu = None
         self.wrapper = None
         self.forna = None
+        self.use_cache = False
+        self.cache = Cache()
 
         self.parse_parameters()
         self.read_data()
         self.create()
 
+    # parse all input parameters
+    # -i path -> the path of the folder with all the data.
+    # if -i is not provided, the data folder of the project is used as default
     def parse_parameters(self):
         self.prs = argparse.ArgumentParser(
             description='Interactive Folding Visualizer')
         self.prs.add_argument('-i', '--input', required=False,
                               help='Working Directory')
-        self.prs.parse_args()
-        # TODO Path args?
-        self.working_path = 'C:/Users/Marco/IFV/data/'
+        args = self.prs.parse_args()
 
+        if args.input is not None:
+            self.working_path = args.input
+        else:
+            self.working_path = 'data/'
+
+    # reads the data for the all the selected_x properties
     def read_data(self):
         if self.data_provider is None:
-            self.data_provider = data_manager(input_path=self.working_path, position_file=self.selected_graph,
-                                              section_file=self.selected_bed, folding_version=version)
+            self.data_provider = DataManager(input_path=self.working_path, position_file=self.selected_graph,
+                                             section_file=self.selected_bed, folding_version=version)
             self.file_lists = self.data_provider.list_files()
         else:
             self.data_provider.update(input_path=self.working_path, position_file=self.selected_graph,
                                       section_file=self.selected_bed, folding_version=version)
+            if self.must_read_new():
+                self.read_file(self.selected_transcript)
 
-        if self.must_read_new():
-            self.read_file(self.selected_transcript)
-
+    # reads the data for the given transcript file (.fa.dbr)
     def read_file(self, name):
         self.section = self.data_provider.read_section(name.replace('.fa.dbr', ''))
         self.positions = self.data_provider.read_positions(self.section)
         self.folding = self.data_provider.read_file(name, self.section, self.positions)
 
+    # checks cache with must_read_new.
+    # if a new read is necessary the method reads the new data and plots it
+    def check_new_load(self):
+        graphs = {}
+
+        if self.selected_graph is not None \
+                and self.selected_bed is not None \
+                and self.selected_transcript is not None:
+            self.read_data()
+            if self.selected_folding_index is not None:
+                self.selected_folding = self.folding[self.selected_folding_index]
+                cached_folding = self.find_cached()
+
+                if cached_folding is None:
+                    graphs = self.plot_graphs(plot_pca=True, plot_forna=True)
+                    self.cache_graph(graphs)
+                else:
+                    graphs = cached_folding.graph
+            else:
+                graphs = self.plot_graphs(plot_pca=True, plot_forna=False)
+                graphs['forna'] = dbc.Label('NO_DATA_FOUND')
+
+        else:
+            graphs['pca'] = dbc.Label('NO_DATA_FOUND')
+            graphs['forna'] = dbc.Label('NO_DATA_FOUND')
+        return graphs
+
+    # checks if the app has to read a new file or could use previous data
+    def must_read_new(self):
+        read_new = False
+
+        if self.folding is None:
+            read_new = True
+        else:
+            if self.folding[0].section is None:
+                read_new = True
+            else:
+                read_new = self.folding[0].section.transcript is not self.selected_transcript
+        return read_new
+
+    # fills the dropdown for all possible foldings after reading the .fa.dbr file
+    def update_values(self):
+        options = []
+        if self.selected_transcript is not None:
+            index = 0
+            for f in self.folding:
+                options.append({'label': f.label, 'value': index})
+                index += 1
+        return options
+
+    # finds a cached folding if present, else returns None
+    def find_cached(self):
+        if self.use_cache:
+            return self.cache.get_from_cache(self.selected_folding)
+        else:
+            return None
+
+    # caches the given graph with the current selected folding
+    # graph - a graph dict with plotted graphs
+    def cache_graph(self, graph):
+        if self.use_cache:
+            if self.selected_folding is not None:
+                self.selected_folding.graph = graph
+                self.cache.add_to_cache(self.selected_folding)
+
+    # creates the app
     def create(self):
         self.app = dash.Dash(name=__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
         self.init_layout()
         self.define_callbacks()
 
+    # plots the selected data
+    # plot_pca - the transcript file which should be plotted as pca scatterplot
+    # plot_forna - the folding structure which should be plotted using forna container
     def plot_graphs(self, plot_pca, plot_forna):
         graphs = {}
 
@@ -80,13 +162,14 @@ class Ifv:
             graphs['pca'] = dcc.Graph(figure=fig, id="pca")
 
         if plot_forna:
-            plotter_forna = FORNAPlotter()
-            forna = plotter_forna.plot(folding=self.folding[self.selected_folding], color_scale=self.selected_color_mode)
+            forna = Forna()
+            forna = forna.plot(folding=self.selected_folding, color_scale=self.selected_color_mode)
             self.forna = forna.id
             graphs['forna'] = html.Div(forna)
 
         return graphs
 
+    # creates the layout for the app
     def init_layout(self):
 
         self.graph = html.Div(children=['Graph'], id='graph', className='col-md-7 column')
@@ -130,8 +213,8 @@ class Ifv:
                     dbc.Label("Färbung"),
                     dbc.Checklist(
                         options=[
-                            {"label": "Blockfärbung", "value": ColorScale.REGION},
-                            {"label": "Logarithmisch", "value": ColorScale.LOG},
+                            {"label": "Blockfärbung", "value": Color.REGION},
+                            {"label": "Logarithmisch", "value": Color.LOG},
                         ],
                         value=[],
                         id="color_select",
@@ -145,20 +228,21 @@ class Ifv:
             visdcc.Run_js(id='javascript')
         ]
 
-        graph_select = self.find_menu_child(id='graph_select')
+        graph_select = self.find_menu_child(key='graph_select')
         for file in self.file_lists['position_files']:
             graph_select.options.append({'label': file, 'value': file})
 
-        bed_select = self.find_menu_child(id='bed_select')
+        bed_select = self.find_menu_child(key='bed_select')
         for file in self.file_lists['section_files']:
             bed_select.options.append({'label': file, 'value': file})
 
-        transcript_select = self.find_menu_child(id='transcript_select')
+        transcript_select = self.find_menu_child(key='transcript_select')
         for file in self.file_lists['folding_files']:
             transcript_select.options.append({'label': file, 'value': file})
 
         self.app.layout = self.wrapper
 
+    # defines all the callbacks for the GUI of the app
     def define_callbacks(self):
         @self.app.callback(
             Output(component_id='plot', component_property='children'),
@@ -171,21 +255,24 @@ class Ifv:
             Input(component_id='color_select', component_property='value')
         )
         def bed_selected(bed_select, graph_select, folding_select, transcript_select, color_select):
+            start_time = current_milli_time()
             ifv.selected_bed = bed_select
             ifv.selected_graph = graph_select
-            ifv.selected_folding = folding_select
+            ifv.selected_folding_index = folding_select
             ifv.selected_transcript = transcript_select
 
-            if ColorScale.REGION in color_select:
-                ifv.selected_color_mode = ColorScale.REGION
+            if Color.REGION in color_select:
+                ifv.selected_color_mode = Color.REGION
             else:
-                if ColorScale.LOG in color_select:
-                    ifv.selected_color_mode = ColorScale.LOG
+                if Color.LOG in color_select:
+                    ifv.selected_color_mode = Color.LOG
                 else:
-                    ifv.selected_color_mode = ColorScale.ABSOLUTE
+                    ifv.selected_color_mode = Color.ABSOLUTE
 
             graph = ifv.check_new_load()
             new_foldings = ifv.update_values()
+            end_time = current_milli_time()
+            print("used time : " + str(end_time-start_time))
             return graph['pca'], graph['forna'], new_foldings
 
         @self.app.callback(
@@ -195,11 +282,9 @@ class Ifv:
             if click_data is not None:
                 index = click_data['points'][0]['pointIndex']
                 folding = self.folding[index]
-                # print(folding.label)
-                # print(click_data)
                 return index
             else:
-                return self.selected_folding
+                return self.selected_folding_index
 
         @self.app.callback(
             Output('javascript', 'run'),
@@ -211,12 +296,14 @@ class Ifv:
 
             return ''
 
-    def find_menu_child(self, id):
+    # convenience method for finding the menu layout element and its children
+    # key - the id of the element
+    def find_menu_child(self, key):
         child = []
 
         for ch in self.menu.children:
             try:
-                if ch.id is id:
+                if ch.id is key:
                     child = ch
                     break
             except AttributeError:
@@ -225,45 +312,14 @@ class Ifv:
 
         return child
 
+    # starts the app
     def start(self):
         self.app.run_server(debug=True)
 
-    def check_new_load(self):
-        graphs = {}
-        if self.selected_graph is not None \
-                and self.selected_bed is not None \
-                and self.selected_transcript is not None:
-            self.read_data()
-            if self.selected_folding is not None:
-                graphs = self.plot_graphs(plot_pca=True, plot_forna=True)
-            else:
-                graphs = self.plot_graphs(plot_pca=True, plot_forna=False)
-                graphs['forna'] = dbc.Label('NO_DATA_FOUND')
-        else:
-            graphs['pca'] = dbc.Label('NO_DATA_FOUND')
-            graphs['forna'] = dbc.Label('NO_DATA_FOUND')
-        return graphs
 
-    def must_read_new(self):
-        read_new = False
-
-        if self.folding is None:
-            read_new = True
-        else:
-            if self.folding[0].section is None:
-                read_new = True
-            else:
-                read_new = self.folding[0].section.transcript is not self.selected_transcript
-        return read_new
-
-    def update_values(self):
-        options = []
-        if self.selected_transcript is not None:
-            index = 0
-            for f in self.folding:
-                options.append({'label': f.label, 'value': index})
-                index += 1
-        return options
+# gives the current time in millis
+def current_milli_time():
+    return round(time.time() * 1000)
 
 
 if __name__ == '__main__':

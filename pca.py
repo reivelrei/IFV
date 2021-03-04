@@ -3,7 +3,11 @@ import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 
 
+# This class plots a folding file as a pca scatter plot.
 class PCAPlotter:
+
+    # plots the given folding
+    # folding - the folding
     @staticmethod
     def plot(foldings):
         pca_vectors = []
@@ -18,6 +22,7 @@ class PCAPlotter:
 
         return PCAPlotter.__create_figure(pca_vectors, labels, colors)
 
+    # [PRIVATE] plots the given vectors with the given labels and colors
     @staticmethod
     def __create_figure(pca_vectors, point_labels, colors):
         pca = PCA(n_components=2)
@@ -32,7 +37,7 @@ class PCAPlotter:
         fig = go.Figure(px.scatter(x=df['x'], y=df['y'], hover_name=point_labels,
                                    color=colors,
                                    color_continuous_scale=px.colors.sequential.Viridis,
-                                   labels=labels, height=900, width=900, template="plotly_dark"))
+                                   labels=labels, height=900, width=900))
 
         fig.update_traces(customdata=point_labels, hovertemplate='<i>Energy</i>: %{customdata}', selector=dict(type='scatter'))
         fig.update_xaxes(title_text='PC2')

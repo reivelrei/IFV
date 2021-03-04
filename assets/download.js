@@ -1,30 +1,3 @@
-function download_old(data){
-    let el = document.getElementById(data).querySelector('#plotting-area');
-    el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    console.log(data, el);
-
-    const a = document.createElement("a");
-      a.style.display = "none";
-      document.body.appendChild(a);
-      let type="image/svg+xml";
-
-      // Set the HREF to a Blob representation of the data to be downloaded
-      a.href = window.URL.createObjectURL(
-        new Blob([el.outerHTML], { type })
-      );
-
-      // Use download attribute to set set desired file name
-      a.setAttribute("download", data+'.svg');
-
-      // Trigger the download by simulating click
-      a.click();
-
-      // Cleanup
-      window.URL.revokeObjectURL(a.href);
-      document.body.removeChild(a);
-
-}
-
 function download(data){
   let el = document.getElementById(data).querySelector('#plotting-area');
     console.log(data, el);
@@ -48,9 +21,6 @@ function download(data){
       // Cleanup
       window.URL.revokeObjectURL(a.href);
       document.body.removeChild(a);
-
-
-
 }
 
 function read_Element(ParentNode, OrigData){
