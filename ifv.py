@@ -9,10 +9,14 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import visdcc
 from color import Color
+from folding import Folding
 from forna import Forna
 from cache import Cache
 from datamanager import DataManager
 from pca import PCAPlotter
+from position import Position
+from section import Section
+
 version = 1
 
 
@@ -184,25 +188,25 @@ class Ifv:
                         ], id='wrapper')
 
         self.menu.children = [
-            dbc.Label('Bed-File (.bed)'),
+            dbc.Label(Section.get_display_name()),
             dcc.Dropdown(
                 id="bed_select",
                 value=None,
                 options=[
                 ]),
-            dbc.Label('Bedgraph-File (.bedgraph)'),
+            dbc.Label(Position.get_display_name()),
             dcc.Dropdown(
                 id="graph_select",
                 value=None,
                 options=[
                 ]),
-            dbc.Label('Transcript (.fa.dbr)'),
+            dbc.Label(Folding.get_display_name()),
             dcc.Dropdown(
                 id="transcript_select",
                 value=None,
                 options=[
             ]),
-            dbc.Label('Faltung'),
+            dbc.Label('folding'),
             dcc.Dropdown(
                 id="folding_select",
                 value=None,

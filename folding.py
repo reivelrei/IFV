@@ -43,3 +43,8 @@ class Folding:
                 self.pca_vector.append(0)
             else:
                 self.pca_vector.append(1)
+
+    # get the name of the folder
+    @staticmethod
+    def get_display_name():
+        return "transcript"

@@ -57,3 +57,8 @@ class Section:
             #print(block.bezeichnung+"\t"+str(block.start)+"\t" + str(block.end))
 
         return blocks
+
+    # get the name of the folder
+    @staticmethod
+    def get_display_name():
+        return "sections"

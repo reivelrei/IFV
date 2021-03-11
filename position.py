@@ -6,12 +6,20 @@
 
 
 class Position:
-    def __init__(self, chromosome, start, end, mapped_reads):
+
+    def __init__(self, chromosome, start, end, sign, mapped_reads):
         self.chromosome = chromosome
         self.start = start
         self.end = end
+        self.sign = sign
         self.mapped_reads = mapped_reads
 
     # compare two positions by their chromosome and start value
     def __eq__(self, other):
-        return self.chromosome == other.chromosome and self.start == other.start
+        return self.chromosome == other.chromosome and self.start == other.start and self.sign == other.sign
+
+    # get the name of the folder
+    @staticmethod
+    def get_display_name():
+        return "positions"
+

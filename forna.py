@@ -96,7 +96,7 @@ class Forna:
     def __find_value(self, positions, section, pos):
         value = 0
         try:
-            index = positions.index(Position(chromosome=section.chrom,  start=pos, end=0, mapped_reads=0))
+            index = positions.index(Position(chromosome=section.chrom,  start=pos, end=0, sign=section.sign, mapped_reads=0))
             value = positions[index].mapped_reads
         except ValueError:
             value = 0
