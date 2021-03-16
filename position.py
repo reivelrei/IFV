@@ -21,5 +21,5 @@ class Position:
     # get the name of the folder
     @staticmethod
     def get_display_name():
-        return "positions"
+        return "data"
 

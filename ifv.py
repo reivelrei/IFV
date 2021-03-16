@@ -214,11 +214,11 @@ class Ifv:
             ]),
             dbc.FormGroup(
                 [
-                    dbc.Label("Färbung"),
+                    dbc.Label("coloring"),
                     dbc.Checklist(
                         options=[
-                            {"label": "Blockfärbung", "value": Color.REGION},
-                            {"label": "Logarithmisch", "value": Color.LOG},
+                            {"label": "blocks", "value": Color.REGION},
+                            {"label": "logarithmic", "value": Color.LOG},
                         ],
                         value=[],
                         id="color_select",
@@ -234,14 +234,20 @@ class Ifv:
 
         graph_select = self.find_menu_child(key='graph_select')
         for file in self.file_lists['position_files']:
+            if graph_select.value is None:
+                graph_select.value = file
             graph_select.options.append({'label': file, 'value': file})
 
         bed_select = self.find_menu_child(key='bed_select')
         for file in self.file_lists['section_files']:
+            if bed_select.value is None:
+                bed_select.value = file
             bed_select.options.append({'label': file, 'value': file})
 
         transcript_select = self.find_menu_child(key='transcript_select')
         for file in self.file_lists['folding_files']:
+            if transcript_select.value is None:
+                transcript_select.value = file
             transcript_select.options.append({'label': file, 'value': file})
 
         self.app.layout = self.wrapper

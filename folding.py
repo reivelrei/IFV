@@ -5,7 +5,7 @@
 # sequence - the sequence of the folding found in the .dbr file
 # foldings - the folding structure found in the .dbr file
 # section - the section for the structure
-# positions - the positions for the structure
+# positions - the data for the structure
 # section_file -  name of the section file (.bed)
 # position_file - name of the position file (.bedgraph)
 def parse(startline, sequence, foldings, section, positions, section_file, position_file):
@@ -21,7 +21,7 @@ def parse(startline, sequence, foldings, section, positions, section_file, posit
 # sequence - the sequence of the folding found in the .dbr file
 # foldings - the folding structure found in the .dbr file
 # section - the section for the structure
-# positions - the positions for the structure
+# positions - the data for the structure
 # section_file -  name of the section file (.bed)
 # position_file - name of the position file (.bedgraph)
 class Folding:

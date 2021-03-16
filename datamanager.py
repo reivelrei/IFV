@@ -33,8 +33,8 @@ class DataManager:
 
     # reads a folding file with the given name
     # name -  name of the folding file
-    # section - read sections for this folding file
-    # positions -  read positions for this folding file
+    # section - read annotation for this folding file
+    # positions -  read data for this folding file
     def read_file(self, name, section, positions):
         data = []
         input_file = self.input_path + Folding.get_display_name() + "/" + name

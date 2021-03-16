@@ -45,4 +45,4 @@ For questions or problems, please feel free to write an email and I will get bac
 * The visdccc package is licensed under the [MIT license](https://github.com/jimmybow/visdcc/blob/master/LICENSE.txt).
 * The plotly package is licensed under the [MIT license](https://github.com/plotly/plotly.py/blob/master/LICENSE.txt).
 * The sklearn package is licensed under the [3-Clause BSD license](https://github.com/scikit-learn/scikit-learn/blob/main/COPYING).
-* IFV is licensed under the [xxx](xxx).
+* IFV is licensed under the [MIT license](https://github.com/masohn/IFV/blob/main/LICENSE).

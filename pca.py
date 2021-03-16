@@ -36,18 +36,26 @@ class PCAPlotter:
         df = {'x': components[:, 0] * -1, 'y': components[:, 1]}
         fig = go.Figure(px.scatter(x=df['x'], y=df['y'], hover_name=point_labels,
                                    color=colors,
-                                   color_continuous_scale=px.colors.sequential.Viridis,
+                                   color_continuous_scale=px.colors.sequential.Reds[::-1],
                                    labels=labels, height=900, width=900))
 
-        fig.update_traces(customdata=point_labels, hovertemplate='<i>Energy</i>: %{customdata}', selector=dict(type='scatter'))
-        fig.update_xaxes(title_text='PC2')
-        fig.update_yaxes(title_text='PC1')
+        fig.update_traces(customdata=point_labels, hovertemplate='<i>Energy</i>: %{customdata}',
+                          selector=dict(type='scatter'), marker_line_width=0.5, marker_size=8)
+        fig.update_xaxes(title_text='PC2', showline=True, linewidth=1, linecolor='black', showgrid=True, gridwidth=1,
+                         gridcolor='#f0f0f0', zeroline=True, zerolinewidth=1, zerolinecolor='#f0f0f0')
+        fig.update_yaxes(title_text='PC1', showline=True, linewidth=1, linecolor='black', showgrid=True, gridwidth=1,
+                         gridcolor='#f0f0f0', zeroline=True, zerolinewidth=1, zerolinecolor='#f0f0f0')
         fig.update_layout(
-            title='PCA',
             dragmode='select',
             width=450,
             height=450,
-            hovermode='closest'
+            hovermode='closest',
+            plot_bgcolor='rgba(0, 0, 0, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)'
         )
+
+        fig.update_layout(coloraxis_colorbar=dict(
+            title="MFE",
+        ))
 
         return fig

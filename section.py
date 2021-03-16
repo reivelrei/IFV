@@ -61,4 +61,4 @@ class Section:
     # get the name of the folder
     @staticmethod
     def get_display_name():
-        return "sections"
+        return "annotation"
