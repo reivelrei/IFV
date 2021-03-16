@@ -211,4 +211,9 @@ class DataManager:
                                 else:
                                     files['unknown'].append(file)
 
+        files['position_files'] = sorted(files['position_files'], reverse=True)
+        files['section_files'] = sorted(files['section_files'], reverse=True)
+        files['folding_files'] = sorted(files['folding_files'], reverse=True)
+        files['unknown'] = sorted(files['unknown'], reverse=True)
+
         return files

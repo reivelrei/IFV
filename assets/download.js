@@ -21,11 +21,12 @@ function download(data){
       // Cleanup
       window.URL.revokeObjectURL(a.href);
       document.body.removeChild(a);
+      hideLoader();
 }
 
 function read_Element(ParentNode, OrigData){
     let ContainerElements = ["svg","g"];
-    let RelevantStyles = {"rect":["fill","stroke","stroke-width"],"path":["fill","stroke","stroke-width"],"circle":["fill","stroke","stroke-width"],"line":["stroke","stroke-width"],"text":["fill","font-size","text-anchor"],"polygon":["stroke","fill"]};
+    let RelevantStyles = {"rect":["fill","stroke","stroke-width"],"path":["fill","stroke","stroke-width"],"circle":["fill","stroke","stroke-width"],"line":["stroke","stroke-width"],"text":["fill","font-size","text-anchor", "font-family"],"polygon":["stroke","fill"]};
 
     let Children = ParentNode.childNodes;
     let OrigChildDat = OrigData.childNodes;

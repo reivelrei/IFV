@@ -1,6 +1,11 @@
+*{
+    margin:0;
+    padding:0;
+}
 #wrapper{
-    height: 100vh;
-    width: 100vw;
+    min-width: 1400px;
+    min-height: 100vh;
+    overflow-x: auto;
 }
 
 #output{
@@ -14,12 +19,16 @@
     text-align: left !important;
 }
 
+#fornaWrapper{
+    height: 100vh
+}
+
 .column{
     height: 100%;
 }
 
 .forna-container{
-    height: 100vh;
+    height: 100%;
     background: white;
 }
 
@@ -29,4 +38,79 @@
 
 .background{
     fill: white !important;
+}
+
+.hide{
+    display: none;
+}
+
+#loadWrapper{
+    visibility: hidden;
+}
+
+#loader{
+    z-index: 999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    clear: both;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255,0.85);
+}
+
+#legend_wrapper{
+    margin-bottom: 10px;
+}
+
+.legendBlock{
+    width: 20px;
+    height: 20px;
+    border: solid 1pt black;
+    float: left;
+    margin-right: 8px;
+
+}
+
+.legendLabel{
+    margin-bottom: 5px;
+}
+
+.lds-ring {
+    margin: 300px auto;
+    display: block;
+    width: 200px;
+    height: 200px;
+    opacity: 0.8;
+}
+.lds-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    margin: 8px;
+
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: black transparent transparent transparent;
+    border-width: 10px;
+    border-style: solid;
+}
+.lds-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

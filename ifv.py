@@ -8,6 +8,8 @@ import dash_bootstrap_components as dbc
 
 from dash.dependencies import Input, Output
 import visdcc
+
+from block import Block
 from color import Color
 from folding import Folding
 from forna import Forna
@@ -41,6 +43,9 @@ class Ifv:
         self.graph = None
         self.plot = None
         self.menu = None
+        self.blocklegende = None
+        self.loader = None
+        self.output = None
         self.wrapper = None
         self.forna = None
         self.use_cache = False
@@ -92,18 +97,17 @@ class Ifv:
                 and self.selected_bed is not None \
                 and self.selected_transcript is not None:
             self.read_data()
-            if self.selected_folding_index is not None:
-                self.selected_folding = self.folding[self.selected_folding_index]
-                cached_folding = self.find_cached()
+            if self.selected_folding_index is None:
+                self.selected_folding_index = 0
 
-                if cached_folding is None:
-                    graphs = self.plot_graphs(plot_pca=True, plot_forna=True)
-                    self.cache_graph(graphs)
-                else:
-                    graphs = cached_folding.graph
+            self.selected_folding = self.folding[self.selected_folding_index]
+            cached_folding = self.find_cached()
+
+            if cached_folding is None:
+                graphs = self.plot_graphs(plot_pca=True, plot_forna=True)
+                self.cache_graph(graphs)
             else:
-                graphs = self.plot_graphs(plot_pca=True, plot_forna=False)
-                graphs['forna'] = dbc.Label('NO_DATA_FOUND')
+                graphs = cached_folding.graph
 
         else:
             graphs['pca'] = dbc.Label('NO_DATA_FOUND')
@@ -169,22 +173,26 @@ class Ifv:
             forna = Forna()
             forna = forna.plot(folding=self.selected_folding, color_scale=self.selected_color_mode)
             self.forna = forna.id
-            graphs['forna'] = html.Div(forna)
+            graphs['forna'] = html.Div(children=[forna], id='fornaWrapper')
 
         return graphs
 
     # creates the layout for the app
     def init_layout(self):
 
-        self.graph = html.Div(children=['Graph'], id='graph', className='col-md-7 column')
-        self.plot = html.Div(children=['Plot'], id='plot', className='col-md-3 column')
+        self.graph = html.Div(children=[''], id='graph', className='col-md-7 column')
+        self.plot = html.Div(children=[''], id='plot', className='col-md-3 column')
+
+        self.loader = html.Div(children=[html.Div(children=[html.Div(), html.Div(), html.Div(), html.Div()], className='lds-ring')],
+                                id='loader',  className='loader')
+
         self.menu = html.Div(children=['Menu'], id='menu', className='col-md-2 column')
         self.output = html.Div(children=[], id='output')
-
         self.wrapper = html.Div(children=[
                         self.menu,
                         self.graph,
-                        self.plot
+                        self.plot,
+                        self.loader
                         ], id='wrapper')
 
         self.menu.children = [
@@ -227,9 +235,12 @@ class Ifv:
                     ),
                 ]
             ),
+            html.Div(children=[], id='legende', className='legende'),
             dbc.Button("Download", color="info", className="mr-1", id='download_button'),
             self.output,
-            visdcc.Run_js(id='javascript')
+            visdcc.Run_js(id='javascript'),
+            visdcc.Run_js(id='loadingScript')
+
         ]
 
         graph_select = self.find_menu_child(key='graph_select')
@@ -258,6 +269,8 @@ class Ifv:
             Output(component_id='plot', component_property='children'),
             Output(component_id='graph', component_property='children'),
             Output(component_id='folding_select', component_property='options'),
+            Output(component_id='legende', component_property='children'),
+            Output(component_id='loadingScript', component_property='run'),
             Input(component_id='bed_select', component_property='value'),
             Input(component_id='graph_select', component_property='value'),
             Input(component_id='folding_select', component_property='value'),
@@ -270,9 +283,20 @@ class Ifv:
             ifv.selected_graph = graph_select
             ifv.selected_folding_index = folding_select
             ifv.selected_transcript = transcript_select
+            legende = None
 
             if Color.REGION in color_select:
                 ifv.selected_color_mode = Color.REGION
+                legende = html.Div(children=[html.Div(children=[], style=
+                                             {'backgroundColor':  Block.color_intron()}, className='legendBlock intronBlock'),
+                                             html.Div(children=["= Intron"], className = "legendLabel"),
+                                             html.Div(children=[], style=
+                                             {'backgroundColor': Block.color_utr()}, className='legendBlock'),
+                                             html.Div(children=["= UTR"], className="legendLabel"),
+                                             html.Div(children=[], style=
+                                             {'backgroundColor': Block.color_cds()}, className='legendBlock'),
+                                             html.Div(children=["= CDS"], className="legendLabel"),
+                                             ], id='legend_wrapper')
             else:
                 if Color.LOG in color_select:
                     ifv.selected_color_mode = Color.LOG
@@ -283,7 +307,7 @@ class Ifv:
             new_foldings = ifv.update_values()
             end_time = current_milli_time()
             print("used time : " + str(end_time-start_time))
-            return graph['pca'], graph['forna'], new_foldings
+            return graph['pca'], graph['forna'], new_foldings, legende, 'hideLoader()'
 
         @self.app.callback(
             Output(component_id='folding_select', component_property='value'),

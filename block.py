@@ -17,3 +17,14 @@ class Block:
     def is_cds(self):
         return "CDS" in self.bezeichnung
 
+    @staticmethod
+    def color_utr():
+        return '#023E7D'
+
+    @staticmethod
+    def color_cds():
+        return '#5FADFC'
+
+    @staticmethod
+    def color_intron():
+        return 'white'

@@ -1,6 +1,7 @@
 import dash_bio as dashbio
 import math
 
+from block import Block
 from color import Color
 from position import Position
 import operator
@@ -21,7 +22,7 @@ class Forna:
 
         if color_scale is Color.REGION:
             domain = [0, 100, 200]
-            range = ['white', '#023E7D', '#5FADFC']
+            range = [Block.color_intron(), Block.color_utr(), Block.color_cds()]
         else:
             domain = [0,  max(clrs.items(), key=operator.itemgetter(1))[1]]
             range = ['white', 'red']
@@ -42,9 +43,9 @@ class Forna:
                 'name': folding.section.transcript
             }
         }]
-
+        size = 800
         fig = dashbio.FornaContainer(id='forna'+str(int(color_scale))+folding.section.transcript, sequences=sequences,
-                                     height=900, width=1100, colorScheme='custom', customColors=custom_colors)
+                                     height=size, width=size+300, colorScheme='custom', customColors=custom_colors)
         return fig
 
     # [PRIVATE] creates a color array

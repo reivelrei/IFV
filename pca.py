@@ -37,7 +37,7 @@ class PCAPlotter:
         fig = go.Figure(px.scatter(x=df['x'], y=df['y'], hover_name=point_labels,
                                    color=colors,
                                    color_continuous_scale=px.colors.sequential.Reds[::-1],
-                                   labels=labels, height=900, width=900))
+                                   labels=labels, height=350, width=350))
 
         fig.update_traces(customdata=point_labels, hovertemplate='<i>Energy</i>: %{customdata}',
                           selector=dict(type='scatter'), marker_line_width=0.5, marker_size=8)
@@ -47,8 +47,8 @@ class PCAPlotter:
                          gridcolor='#f0f0f0', zeroline=True, zerolinewidth=1, zerolinecolor='#f0f0f0')
         fig.update_layout(
             dragmode='select',
-            width=450,
-            height=450,
+            width=350,
+            height=350,
             hovermode='closest',
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)'
