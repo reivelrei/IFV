@@ -22,7 +22,7 @@ class Forna:
 
         if color_scale is Color.REGION:
             domain = [0, 100, 200]
-            range = [Block.color_intron(), Block.color_utr(), Block.color_cds()]
+            range = [Block.color_intron(), Block.color_cds(), Block.color_utr()]
         else:
             domain = [0,  max(clrs.items(), key=operator.itemgetter(1))[1]]
             range = ['white', 'red']
