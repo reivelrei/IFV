@@ -19,11 +19,11 @@ class Block:
 
     @staticmethod
     def color_utr():
-        return '#023E7D'
+        return '#5FADFC'
 
     @staticmethod
     def color_cds():
-        return '#5FADFC'
+        return '#023E7D'
 
     @staticmethod
     def color_intron():
