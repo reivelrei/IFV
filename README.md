@@ -26,12 +26,16 @@ python3 ifv.py
 
 optional input arguments
 ```
-    -i, --input     Input directory containing the 3 folders: sections, positions and transcript.
+    -i, --input     Input directory containing the 4 folders: annotation, data, transcript and config.
                     Add new files according to the following principle:
-                        sections - 12-column .bed format
-                        positions - 4-column .bedgraph format and 6-column .bed format
-                        transcript - transcript containing the sequence and foldings with corresponding energy     
+                        annotation - 12-column .bed format
+                        data - 4-column .bedgraph format and 6-column .bed format
+                        transcript - transcript containing the sequence and foldings with corresponding energy
+                        config - regions.txt and heatmaps.txt containing colors for the visualization
 ```
+## File Examples
+TODO
+
 ## Contact
 
 For questions or problems, please feel free to write an email and I will get back to you as soon as possible.

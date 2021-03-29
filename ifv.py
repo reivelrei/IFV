@@ -68,7 +68,7 @@ class Ifv:
         self.prs.add_argument('-i', '--input', required=False,
                               help='Working Directory')
         self.prs.add_argument('-p', '--port', required=False,
-                              help='Working Directory')
+                              help='Port number')
         args = self.prs.parse_args()
 
         if args.input is not None:
