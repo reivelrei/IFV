@@ -29,6 +29,7 @@ class Ifv:
     def __init__(self):
         self.prs = None
         self.working_path = None
+        self.inputport = None
         self.data_provider = None
         self.file_lists = None
         self.section = None
@@ -66,12 +67,19 @@ class Ifv:
             description='Interactive Folding Visualizer')
         self.prs.add_argument('-i', '--input', required=False,
                               help='Working Directory')
+        self.prs.add_argument('-p', '--port', required=False,
+                              help='Working Directory')
         args = self.prs.parse_args()
 
         if args.input is not None:
             self.working_path = args.input
         else:
             self.working_path = 'data/'
+        if args.port is not None:
+            self.inputport = args.port
+        else:
+            self.working_path = '8050'
+
 
     # reads the data for the all the selected_x properties
     def read_data(self):
@@ -405,7 +413,7 @@ class Ifv:
 
     # starts the app
     def start(self):
-        self.app.run_server(debug=True)
+        self.app.run_server(host='0.0.0.0', port=self.inputport, debug=True)
 
 
 # gives the current time in millis
@@ -416,4 +424,3 @@ def current_milli_time():
 if __name__ == '__main__':
     ifv = Ifv()
     ifv.start()
-
