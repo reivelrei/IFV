@@ -8,9 +8,9 @@
 # positions - the data for the structure
 # section_file -  name of the section file (.bed)
 # position_file - name of the position file (.bedgraph)
-def parse(startline, sequence, foldings, section, positions, section_file, position_file):
+def parse(startline, sequence, foldings, section, positions, section_file, position_file, transcript):
     parts = startline.split('=')[1].split(' ')
-    folding = Folding(parts[1], sequence, foldings, section, positions, section_file, position_file)
+    folding = Folding(parts[1], sequence, foldings, section, positions, section_file, position_file, transcript)
 
     return folding
 
@@ -25,7 +25,7 @@ def parse(startline, sequence, foldings, section, positions, section_file, posit
 # section_file -  name of the section file (.bed)
 # position_file - name of the position file (.bedgraph)
 class Folding:
-    def __init__(self, energy, sequence, foldings, section, positions, section_file, position_file):
+    def __init__(self, energy, sequence, foldings, section, positions, section_file, position_file, transcript):
         self.energy = float(energy)
         self.sequence = sequence
         self.foldings = foldings
@@ -34,6 +34,7 @@ class Folding:
         self.label = energy
         self.section_file = section_file
         self.position_file = position_file
+        self.transcript = transcript
         self.colors = {}
         self.graph = {}
         self.pca_vector = []

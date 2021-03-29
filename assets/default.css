@@ -76,6 +76,29 @@
     margin-bottom: 5px;
 }
 
+hr{
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+h1{
+    font-size: 20px;
+    text-align: center;
+    font-weight: bolder;
+}
+
+label{
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+
+#download_button{
+    margin-top: 10px;
+}
+
+/*loader*/
+
 .lds-ring {
     margin: 300px auto;
     display: block;

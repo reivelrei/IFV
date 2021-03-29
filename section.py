@@ -29,29 +29,36 @@ class Section:
         blocks = []
         utr_start_block_ende = self.thickstart - self.start
 
-        blocks.append(Block("UTR_START", 0, utr_start_block_ende-1))
+        blocks.append(Block("UTR_START" if self.sign == '+' else "UTR_END", 0, utr_start_block_ende-1, '5\'' if self.sign == '+' else '3\''))
 
         index = 0
+        self.block_size.remove('')
         for size in self.block_size:
             if len(size) > 0:
 
                 if index is 0:
                     # first block
                     start = utr_start_block_ende
-                    end = int(size) - 1
-                    blocks.append(Block("CDS_" + str(index + 1), start, end))
+                    if index is len(self.block_size) - 1:
+                        # last block
+                        end = self.thickend - self.start
+                    else:
+                        # every other block
+                        end = int(size) - 1
+
+                    blocks.append(Block("CDS_" + str(index + 1), start, end, 'cds'))
                 else:
                     start = int(self.block_start[index])
-                    if index is len(self.block_size) - 2:
+                    if index is len(self.block_size) - 1:
                         # last block
                         end = self.thickend - self.start
                     else:
                         # every other block
                         end = int(start) + int(size)
-                    blocks.append(Block("CDS_" + str(index + 1), start, end))
+                    blocks.append(Block("CDS_" + str(index + 1), start, end, 'cds'))
                 index = index+1
 
-        blocks.append(Block("UTR_END", self.thickend+1 - self.start, self.end - self.start-1))
+        blocks.append(Block("UTR_END" if self.sign == '+' else "UTR_START", self.thickend+1 - self.start, self.end - self.start-1,  '3\'' if self.sign == '+' else '5\''))
 
         #for block in blocks:
             #print(block.bezeichnung+"\t"+str(block.start)+"\t" + str(block.end))
@@ -62,3 +69,5 @@ class Section:
     @staticmethod
     def get_display_name():
         return "annotation"
+
+

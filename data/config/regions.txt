@@ -1,0 +1,4 @@
+intron=#FFFFFF
+3'=green
+5'=red
+cds=#0066FF

@@ -44,58 +44,64 @@ class DataManager:
 
         if self.folding_version == 1:
             data = self.read_folding(lines=lines, section=section, positions=positions, section_file=self.section_file,
-                                     position_file=self.position_file)
+                                     position_file=self.position_file, transcript=name)
         else:
             if self.folding_version == 2:
                 data = self.read_folding_two(lines=lines, section=section, positions=positions,
                                              section_file=self.section_file,
-                                             position_file=self.position_file)
+                                             position_file=self.position_file, transcript=name)
 
         return data
 
     # reads the section for the given transcript
     # transcript - transcript/folding file name
     def read_section(self, transcript):
-        input_file = self.input_path + Section.get_display_name() + "/" + self.section_file
+        section = None
 
-        with open(input_file, 'r') as input:
-            for line in input:
-                if transcript in line:
-                    values = line.split("\t")
-                    return Section(transcript=values[3], chrom=values[0], start=values[1], end=values[2], sign=values[5],
-                                   thickstart=values[6], thickend=values[7], block_size=values[10],
-                                   block_start=values[11].strip())
+        if self.section_file is not None and len(self.section_file) > 0:
+            input_file = self.input_path + Section.get_display_name() + "/" + self.section_file
+
+            with open(input_file, 'r') as input:
+                for line in input:
+                    if transcript in line:
+                        values = line.split("\t")
+                        section = Section(transcript=values[3], chrom=values[0], start=values[1], end=values[2], sign=values[5],
+                                          thickstart=values[6], thickend=values[7], block_size=values[10],
+                                          block_start=values[11].strip())
+                        break
+        return section
 
     # reads the positions for the given section
     # section - section for which positions should be read
     def read_positions(self, section):
-        input_file = self.input_path + Position.get_display_name() + "/" + self.position_file
         positions = []
-        start = int(section.start)
-        end = int(section.end)
-        chromosome = section.chrom
-        sign = section.sign
-        with open(input_file, 'r') as input:
-            targets = [line.strip() for line in input if section.chrom in line]
-            short_version = True
-            value = targets[0].strip().split("\t")
-            if len(value) == 1:
-                # the format is not split by \t.
-                # trying " "
-                value = targets[0].strip().split(" ")
-
-            if len(value) == 4:
+        if self.position_file is not None and len(self.position_file) > 0 and section is not None:
+            input_file = self.input_path + Position.get_display_name() + "/" + self.position_file
+            start = int(section.start)
+            end = int(section.end)
+            chromosome = section.chrom
+            sign = section.sign
+            with open(input_file, 'r') as input:
+                targets = [line.strip() for line in input if section.chrom in line]
                 short_version = True
-            else:
-                if len(value) == 6:
-                    short_version = False
-                else:
-                    raise ValueError('Unknown format for position file')
+                value = targets[0].strip().split("\t")
+                if len(value) == 1:
+                    # the format is not split by \t.
+                    # trying " "
+                    value = targets[0].strip().split(" ")
 
-            if short_version:
-                self.read_positions_short_format(chromosome, start, end,sign, targets, positions)
-            else:
-                self.read_positions_long_format(chromosome, start, end,sign, targets, positions)
+                if len(value) == 4:
+                    short_version = True
+                else:
+                    if len(value) == 6:
+                        short_version = False
+                    else:
+                        raise ValueError('Unknown format for position file')
+
+                if short_version:
+                    self.read_positions_short_format(chromosome, start, end,sign, targets, positions)
+                else:
+                    self.read_positions_long_format(chromosome, start, end,sign, targets, positions)
 
         return positions
 
@@ -138,7 +144,7 @@ class DataManager:
                 old_pos = deepcopy(new_pos)
 
     # reads all foldings for given parameters for version 1
-    def read_folding(self, lines, section, positions, section_file, position_file):
+    def read_folding(self, lines, section, positions, section_file, position_file, transcript):
         foldings = []
         sequence = ''
         heading = ''
@@ -152,17 +158,17 @@ class DataManager:
             if not line.startswith('>') and sequence == '':
                 sequence = line.strip()
             if sequence != '' and heading != '' and folding != '':
-                foldings.append(parse(heading, sequence, folding, section, positions, section_file, position_file))
+                foldings.append(parse(heading, sequence, folding, section, positions, section_file, position_file, transcript))
                 heading = ''
                 folding = ''
 
         if sequence != '' and heading != '' and folding != '':
-            foldings.append(parse(heading, sequence, folding, section, positions, section_file, position_file))
+            foldings.append(parse(heading, sequence, folding, section, positions, section_file, position_file, transcript))
 
         return foldings
 
     # reads all foldings for given parameters for version 2
-    def read_folding_two(self, lines, section, positions, section_file, position_file):
+    def read_folding_two(self, lines, section, positions, section_file, position_file, transcript):
         foldings = []
         sequence = ''
         heading = ''
@@ -173,7 +179,7 @@ class DataManager:
             if line.startswith('>'):
                 if sequence != '' and heading != '' and folding != '':
                     heading = heading.replace('ENERGY:', 'ENERGY = ') + 'AT5G02120.1::Chr5:419090-419773(+)'
-                    foldings.append(parse(heading, sequence, folding, section, positions, section_file, position_file))
+                    foldings.append(parse(heading, sequence, folding, section, positions, section_file, position_file, transcript))
                     heading = ''
                     folding = ''
                 count += 1
@@ -217,3 +223,19 @@ class DataManager:
         files['unknown'] = sorted(files['unknown'], reverse=True)
 
         return files
+
+    def read_heatmaps(self):
+        return DataManager.read_config(self, input_file=self.input_path + "config/heatmaps.txt", array=[])
+
+    def read_blockcolors(self):
+        return DataManager.read_config(self, input_file=self.input_path + "config/regions.txt", array=[])
+
+    @staticmethod
+    def read_config(self, input_file, array):
+        with open(input_file, 'r') as input:
+            for line in input:
+                parts = line.split("=")
+                label = parts[0].strip()
+                value = parts[1].strip()
+                array.append({"label": label, "value": value})
+        return array

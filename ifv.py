@@ -24,6 +24,7 @@ version = 1
 
 # [MAIN]
 # IFV is a tool for visualizing RNA secondary structures and protein binding sites.
+
 class Ifv:
     def __init__(self):
         self.prs = None
@@ -40,6 +41,8 @@ class Ifv:
         self.selected_folding_index = 0
         self.selected_folding = None
         self.selected_color_mode = Color.ABSOLUTE
+        self.selected_heatmap = None
+        self.blockcolors = None
         self.graph = None
         self.plot = None
         self.menu = None
@@ -76,6 +79,7 @@ class Ifv:
             self.data_provider = DataManager(input_path=self.working_path, position_file=self.selected_graph,
                                              section_file=self.selected_bed, folding_version=version)
             self.file_lists = self.data_provider.list_files()
+            self.blockcolors = self.data_provider.read_blockcolors()
         else:
             self.data_provider.update(input_path=self.working_path, position_file=self.selected_graph,
                                       section_file=self.selected_bed, folding_version=version)
@@ -93,9 +97,7 @@ class Ifv:
     def check_new_load(self):
         graphs = {}
 
-        if self.selected_graph is not None \
-                and self.selected_bed is not None \
-                and self.selected_transcript is not None:
+        if self.selected_transcript is not None:
             self.read_data()
             if self.selected_folding_index is None:
                 self.selected_folding_index = 0
@@ -170,8 +172,8 @@ class Ifv:
             graphs['pca'] = dcc.Graph(figure=fig, id="pca")
 
         if plot_forna:
-            forna = Forna()
-            forna = forna.plot(folding=self.selected_folding, color_scale=self.selected_color_mode)
+            forna = Forna(self.blockcolors)
+            forna = forna.plot(folding=self.selected_folding, color_scale=self.selected_color_mode, heatmap=self.selected_heatmap)
             self.forna = forna.id
             graphs['forna'] = html.Div(children=[forna], id='fornaWrapper')
 
@@ -196,6 +198,21 @@ class Ifv:
                         ], id='wrapper')
 
         self.menu.children = [
+            html.H1(children=['Interactive Folding Visualizer']),
+            html.Hr(),
+            dbc.Label(children=[Folding.get_display_name()], id='labelTranscript'),
+            dcc.Dropdown(
+                id="transcript_select",
+                value=None,
+                options=[
+                ]),
+            dbc.Label(children=['folding'], id="labelFolding"),
+            dcc.Dropdown(
+                id="folding_select",
+                value=None,
+                options=[
+                ]),
+            html.Hr(),
             dbc.Label(Section.get_display_name()),
             dcc.Dropdown(
                 id="bed_select",
@@ -208,21 +225,9 @@ class Ifv:
                 value=None,
                 options=[
                 ]),
-            dbc.Label(Folding.get_display_name()),
-            dcc.Dropdown(
-                id="transcript_select",
-                value=None,
-                options=[
-            ]),
-            dbc.Label('folding'),
-            dcc.Dropdown(
-                id="folding_select",
-                value=None,
-                options=[
-            ]),
             dbc.FormGroup(
                 [
-                    dbc.Label("coloring"),
+                    dbc.Label("mode"),
                     dbc.Checklist(
                         options=[
                             {"label": "blocks", "value": Color.REGION},
@@ -236,9 +241,18 @@ class Ifv:
                 ]
             ),
             html.Div(children=[], id='legende', className='legende'),
+            dbc.Label(children=['heatmap'], id='labelHeatmap'),
+            dcc.Dropdown(
+                id="heatmap",
+                value=None,
+                options=self.read_heatmaps()),
+            html.Hr(),
             dbc.Button("Download", color="info", className="mr-1", id='download_button'),
+            html.Hr(),
+            html.Div(children="OK", id='message'),
             self.output,
             visdcc.Run_js(id='javascript'),
+            visdcc.Run_js(id='showScript'),
             visdcc.Run_js(id='loadingScript')
 
         ]
@@ -263,6 +277,9 @@ class Ifv:
 
         self.app.layout = self.wrapper
 
+    def read_heatmaps(self):
+        return self.data_provider.read_heatmaps()
+
     # defines all the callbacks for the GUI of the app
     def define_callbacks(self):
         @self.app.callback(
@@ -270,14 +287,18 @@ class Ifv:
             Output(component_id='graph', component_property='children'),
             Output(component_id='folding_select', component_property='options'),
             Output(component_id='legende', component_property='children'),
+            Output(component_id='showScript', component_property='run'),
             Output(component_id='loadingScript', component_property='run'),
+            Output(component_id='message', component_property='children'),
             Input(component_id='bed_select', component_property='value'),
             Input(component_id='graph_select', component_property='value'),
             Input(component_id='folding_select', component_property='value'),
             Input(component_id='transcript_select', component_property='value'),
-            Input(component_id='color_select', component_property='value')
+            Input(component_id='color_select', component_property='value'),
+            Input(component_id='heatmap', component_property='value')
         )
-        def bed_selected(bed_select, graph_select, folding_select, transcript_select, color_select):
+        def bed_selected(bed_select, graph_select, folding_select, transcript_select, color_select, heatmap):
+            message = ''
             start_time = current_milli_time()
             ifv.selected_bed = bed_select
             ifv.selected_graph = graph_select
@@ -288,14 +309,17 @@ class Ifv:
             if Color.REGION in color_select:
                 ifv.selected_color_mode = Color.REGION
                 legende = html.Div(children=[html.Div(children=[], style=
-                                             {'backgroundColor':  Block.color_intron()}, className='legendBlock intronBlock'),
+                                             {'backgroundColor':  self._get_color('intron')}, className='legendBlock intronBlock'),
                                              html.Div(children=["= Intron"], className = "legendLabel"),
                                              html.Div(children=[], style=
-                                             {'backgroundColor': Block.color_utr()}, className='legendBlock'),
-                                             html.Div(children=["= UTR"], className="legendLabel"),
+                                             {'backgroundColor': self._get_color("5\'")}, className='legendBlock'),
+                                             html.Div(children=["= 5\' UTR"], className="legendLabel"),
                                              html.Div(children=[], style=
-                                             {'backgroundColor': Block.color_cds()}, className='legendBlock'),
-                                             html.Div(children=["= CDS"], className="legendLabel"),
+                                             {'backgroundColor': self._get_color("3\'")}, className='legendBlock'),
+                                             html.Div(children=["= 3\' UTR"], className="legendLabel"),
+                                             html.Div(children=[], style=
+                                             {'backgroundColor':self._get_color('cds')}, className='legendBlock'),
+                                             html.Div(children=["= CDS"], className="legendLabel")
                                              ], id='legend_wrapper')
             else:
                 if Color.LOG in color_select:
@@ -303,11 +327,35 @@ class Ifv:
                 else:
                     ifv.selected_color_mode = Color.ABSOLUTE
 
+            ifv.selected_heatmap = heatmap
             graph = ifv.check_new_load()
             new_foldings = ifv.update_values()
+            showscript = 'showControls('
+
+
+            #folding
+            if len(new_foldings) > 0 :
+                showscript += 'true,'
+            else:
+                showscript += 'false,'
+
+            #logswitch
+            if ifv.selected_color_mode is Color.REGION:
+                showscript += 'false,'
+            else:
+                showscript += 'true,'
+
+            #heatmap
+            if ifv.selected_color_mode is Color.ABSOLUTE or ifv.selected_color_mode is Color.LOG:
+                showscript += 'true'
+            else:
+                showscript += 'false'
+
+            showscript += ')'
+
             end_time = current_milli_time()
-            print("used time : " + str(end_time-start_time))
-            return graph['pca'], graph['forna'], new_foldings, legende, 'hideLoader()'
+            message = 'Done in ' + str(end_time-start_time) + "ms"
+            return graph['pca'], graph['forna'], new_foldings, legende, showscript,  'hideLoader()', message
 
         @self.app.callback(
             Output(component_id='folding_select', component_property='value'),
@@ -345,6 +393,15 @@ class Ifv:
                 pass
 
         return child
+
+    def _get_color(self, typ):
+        found = None
+
+        for entry in self.blockcolors:
+            if entry['label'] == typ:
+                found = entry['value']
+
+        return found if found is not None else 'black'
 
     # starts the app
     def start(self):

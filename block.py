@@ -4,10 +4,11 @@
 
 class Block:
 
-    def __init__(self, bezeichnung, start, end):
+    def __init__(self, bezeichnung, start, end, direction):
         self.bezeichnung = bezeichnung
         self.start = start
         self.end = end
+        self.direction = direction
 
     # checks if this block is a UTR block
     def is_utr(self):
@@ -17,14 +18,10 @@ class Block:
     def is_cds(self):
         return "CDS" in self.bezeichnung
 
-    @staticmethod
-    def color_utr():
-        return '#5FADFC'
+    def is3(self):
+        return self.is_utr() and self.direction == '3\''
 
-    @staticmethod
-    def color_cds():
-        return '#023E7D'
+    def is5(self):
+        return not self.is3()
 
-    @staticmethod
-    def color_intron():
-        return 'white'
+

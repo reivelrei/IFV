@@ -36,11 +36,12 @@ class PCAPlotter:
         df = {'x': components[:, 0] * -1, 'y': components[:, 1]}
         fig = go.Figure(px.scatter(x=df['x'], y=df['y'], hover_name=point_labels,
                                    color=colors,
+                                   opacity=0.75,
                                    color_continuous_scale=px.colors.sequential.Reds[::-1],
                                    labels=labels, height=350, width=350))
 
         fig.update_traces(customdata=point_labels, hovertemplate='<i>Energy</i>: %{customdata}',
-                          selector=dict(type='scatter'), marker_line_width=0.5, marker_size=8)
+                          selector=dict(type='scatter'), marker_line_width=0.5, marker_size=10)
         fig.update_xaxes(title_text='PC2', showline=True, linewidth=1, linecolor='black', showgrid=True, gridwidth=1,
                          gridcolor='#f0f0f0', zeroline=True, zerolinewidth=1, zerolinecolor='#f0f0f0')
         fig.update_yaxes(title_text='PC1', showline=True, linewidth=1, linecolor='black', showgrid=True, gridwidth=1,

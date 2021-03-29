@@ -1,0 +1,2 @@
+green yellow red=green yellow red
+blue white red=#0066FF #FFFFFF #FF0000
