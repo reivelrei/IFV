@@ -238,7 +238,7 @@ class Ifv:
                     dbc.Label("mode"),
                     dbc.Checklist(
                         options=[
-                            {"label": "blocks", "value": Color.REGION},
+                            {"label": "regions", "value": Color.REGION},
                             {"label": "logarithmic", "value": Color.LOG},
                         ],
                         value=[],
@@ -413,7 +413,7 @@ class Ifv:
 
     # starts the app
     def start(self):
-        self.app.run_server(host='0.0.0.0', port=self.inputport, debug=True)
+        self.app.run_server(host='0.0.0.0', port=self.inputport)
 
 
 # gives the current time in millis

@@ -5,6 +5,7 @@ IFV is a tool for visualizing RNA secondary structures and protein binding sites
 
 * [Requirements](#requirements)
 * [Usage](#usage)
+* [User interface](#User interface)
 * [Overview of file formats used](#Overview of file formats)
 * [Color customization](#Color customization)
 * [Contact](#contact)
@@ -32,10 +33,13 @@ optional input arguments
                     Add new files according to the following principle:
                         annotation - 12-column .bed format
                         data - 4-column .bedgraph format and 6-column .bed format
-                        transcript - transcript containing the sequence and foldings with corresp. energy
+                        transcript - .fa.dbr containing the sequence and foldings with corresp. energy
                         config - regions.txt and heatmaps.txt containing colors for the visualization
     -p, --port      Custom port, default: 8050.
 ```
+
+## User interface
+![alt text](IFV.PNG)
 
 ## Overview of file formats
 Only the following file formats are accepted and processed by IFV:
