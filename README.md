@@ -5,6 +5,8 @@ IFV is a tool for visualizing RNA secondary structures and protein binding sites
 
 * [Requirements](#requirements)
 * [Usage](#usage)
+* [Overview of file formats used](#Overview of file formats)
+* [Color customization](#Color customization)
 * [Contact](#contact)
 * [License](#license)
 
@@ -30,11 +32,54 @@ optional input arguments
                     Add new files according to the following principle:
                         annotation - 12-column .bed format
                         data - 4-column .bedgraph format and 6-column .bed format
-                        transcript - transcript containing the sequence and foldings with corresponding energy
+                        transcript - transcript containing the sequence and foldings with corresp. energy
                         config - regions.txt and heatmaps.txt containing colors for the visualization
+    -p, --port      Custom port, default: 8050.
 ```
-## File Examples
-TODO
+
+## Overview of file formats
+Only the following file formats are accepted and processed by IFV:
+```
+### .fa.dbr (transcript) 
+>ENERGY = -62.8  AT1G07600.1::Chr1:2338904-2339321(-)
+AUGGCAGAUUCUAACUGUGGAUGUGGCUCCUCCUGCAAAUGUGGUGACUCUUGCAGUUGCGAGAAGAACUACAACAAGGAGUGCGACAACUGUAGCUGUGGAUCAAACUGCAGCUGUGGGUCAAACUGUAACUGUUGA
+...((((.......))))....((.((..(((((.....((((((...((((((....))))))...))))))...))))).)).))..((((((((((((......)))))))))))).((((.(.......)))))
+>ENERGY = -50.0  AT1G07600.1::Chr1:2338904-2339321(-)
+......(((((...((((((.(((.((..((.(......((((((...((((((....))))))...)))))).....))).)).))).))))))....))))).....((((.(((((......))))).))))...
+
+
+### .bed 12-column (annotation) 
+chrom   chromStart  chromEnd    name            score   strand  thickStart  thickEnd    itemRgb blockCount  blockSizes  blockStarts  
+Chr2	539897	    540707	AT2G02130.1     0	+	540070	    540407	0	2	    237,470,	0,340,
+
+
+### .bed 6-column (data)
+chrom   start       stop                 strand
+Chr1    10474880    10474881    X    1   -
+
+
+### .bedgraph 4-column (data)
+chrom   start       stop        reads
+Chr1	10474941    10474942	14
+```
+
+## Color customization
+To use your own color schemes for the visualisation of the regions or the heatmap, you can adjust the regions.txt or the heatmaps.txt.
+
+The color schemes for the heatmap are selectable in the drop-down menu of the user interface. 
+
+```
+### heatmaps.txt
+blue white red = #0066FF #FFFFFF #FF0000
+identifier = white yellow green blue red black
+
+### regions.txt
+intron = #FFFFFF
+3' = green
+5' = red
+cds = #0066FF
+```
+
 
 ## Contact
 
