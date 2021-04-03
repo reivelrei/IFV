@@ -5,9 +5,9 @@ IFV is a tool for visualizing RNA secondary structures and protein binding sites
 
 * [Requirements](#requirements)
 * [Usage](#usage)
-* [User interface](#User interface)
-* [Overview of file formats used](#Overview of file formats)
-* [Color customization](#Color customization)
+* [User interface](#User-interface)
+* [Overview of file formats used](#Overview-of-file-formats)
+* [Color customization](#Color-customization)
 * [Contact](#contact)
 * [License](#license)
 
