@@ -78,7 +78,7 @@ class Ifv:
         if args.port is not None:
             self.inputport = args.port
         else:
-            self.working_path = '8050'
+            self.inputport = '8050'
 
 
     # reads the data for the all the selected_x properties
