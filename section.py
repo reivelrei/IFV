@@ -32,7 +32,8 @@ class Section:
         blocks.append(Block("UTR_START" if self.sign == '+' else "UTR_END", 0, utr_start_block_ende-1, '5\'' if self.sign == '+' else '3\''))
 
         index = 0
-        self.block_size.remove('')
+        if len(self.block_size) > 1:
+            self.block_size.remove('')
         for size in self.block_size:
             if len(size) > 0:
 
